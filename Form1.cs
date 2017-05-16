@@ -13,10 +13,15 @@ namespace EventHubStreamer
 {
     public partial class Form1 : Form
     {
+        // <TO DO>
+        // UPDATE 5 strings below here, otherwise you wont connect to the event hub successfully
+        // </TO DO>
         private static string sbURI = "sb://example.servicebus.windows.net";//ServiceBus URL - i.e. "sb://example.servicebus.windows.net"
         private static string eventHubName = "ingest";//Event Hub Name
         private static string SASKeyName = "RootManageSharedAccessKey";//SAS Key Name - i.e. "RootManageSharedAccessKey"
         private static string SASKey = "8jRh0iAMn7Lehwit73nf7QZJVFzOQ75DPIJzEcM0d+E=";//SAS Key Value - "kjd43298782nbjksdfuywerbdfsduoiewr"
+        private static string receiverName = "Receiver1";//Create custom receiver in Azure portal
+
         private static EventHubClient ehClient;
         private static PartitionReceiver receiver;
 
@@ -37,9 +42,9 @@ namespace EventHubStreamer
             Uri uri = new Uri(sbURI);
             EventHubsConnectionStringBuilder connectionString = new EventHubsConnectionStringBuilder(uri, eventHubName, SASKeyName, SASKey);
             ehClient = EventHubClient.CreateFromConnectionString(connectionString.ToString());
-            receiver = ehClient.CreateReceiver("receiver1", "1", null);
+            receiver = ehClient.CreateReceiver(receiverName, "1", null);
 
-            label1.Text = "Connected to Hub,";
+            label1.Text = "Connected to Hub, Attempting to receive... - " + sbURI;
             //Pick one of the following methods
             //**Method 1 - Uses a Task object to receive events, and updates the TextBox using the BeginInvoke method.
             //**Method 2 - Uses a BackgroundWorker to receive events, updates UI thread ProgressChanged EventHandler pattern.
@@ -51,33 +56,41 @@ namespace EventHubStreamer
 
         private void Method1()
         {
-            SetTextCallback d = new SetTextCallback(SetText);
+            try
+            {
+                SetTextCallback d = new SetTextCallback(SetText);
 
-            Task task = new Task(() => {
+                Task task = new Task(() => {
 
-                do
-                {
-                    IEnumerable<EventData> events = receiver.ReceiveAsync(1000).Result;
-
-                    if (events != null)
+                    do
                     {
-                        string str = "";
-                        foreach (EventData ev in events)
+                        IEnumerable<EventData> events = receiver.ReceiveAsync(1000).Result;
+
+                        if (events != null)
                         {
+                            string str = "";
+                            foreach (EventData ev in events)
+                            {
 
-                            str += ev.SystemProperties.SequenceNumber + " - " + ev.SystemProperties.Offset + ", " + Encoding.UTF8.GetString(ev.Body.ToArray()) + "\r\n";
+                                str += ev.SystemProperties.SequenceNumber + " - " + ev.SystemProperties.Offset + ", " + Encoding.UTF8.GetString(ev.Body.ToArray()) + "\r\n";
+                            }
+
+                            textBox1.BeginInvoke(d, str);
+
                         }
+                    } while (true);
 
-                        textBox1.BeginInvoke(d, str);
+                });
 
-                    }
-                } while (true);
+                task.Start();
 
-            });
-
-            task.Start();
-
-
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.InnerException.Message);
+                Application.Exit();
+            }
+            
         }
 
         private void SetText(string str)
@@ -93,13 +106,22 @@ namespace EventHubStreamer
 
         private void updateTextBoxbackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            do
+            try
             {
-                IEnumerable<EventData> events = receiver.ReceiveAsync(1000).Result;
-                if (events != null)
-                    updateTextBoxbackgroundWorker.ReportProgress(50, events);
+                do
+                {
+                    IEnumerable<EventData> events = receiver.ReceiveAsync(1000).Result;
+                    if (events != null)
+                        updateTextBoxbackgroundWorker.ReportProgress(50, events);
 
-            } while (true);
+                } while (true);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.InnerException.Message);
+                Application.Exit();
+            }
+            
 
         }
 
