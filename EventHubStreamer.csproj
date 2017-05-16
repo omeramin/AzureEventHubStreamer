@@ -34,11 +34,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Azure.Amqp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Azure.Amqp.2.0.4\lib\net45\Microsoft.Azure.Amqp.dll</HintPath>
+      <HintPath>packages\Microsoft.Azure.Amqp.2.0.5\lib\net45\Microsoft.Azure.Amqp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Azure.EventHubs, Version=1.0.1.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Azure.EventHubs.1.0.1\lib\net451\Microsoft.Azure.EventHubs.dll</HintPath>
+    <Reference Include="Microsoft.Azure.EventHubs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Azure.EventHubs.1.0.0\lib\net451\Microsoft.Azure.EventHubs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
